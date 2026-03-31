@@ -1,0 +1,16 @@
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+
+# PDF Parsing
+pdfplumber==0.11.0
+
+# ML
+scikit-learn==1.4.2
+numpy==1.26.4
+xgboost==2.0.3
+pandas==2.2.2
+joblib==1.4.2
+
+# Utils
+python-dotenv==1.0.1

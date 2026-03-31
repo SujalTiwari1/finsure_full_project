@@ -1,0 +1,147 @@
+# =========================
+
+# General
+
+# =========================
+
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+
+# =========================
+
+# Environment Variables
+
+# =========================
+
+.env
+.env.*
+!.env.example
+
+# =========================
+
+# Node.js (MERN Backend + Frontend)
+
+# =========================
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+
+dist/
+build/
+.next/
+out/
+
+# =========================
+
+# Python (ML Service)
+
+# =========================
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Virtual environment (IMPORTANT)
+
+venv/
+env/
+.venv/
+ENV/
+
+# Python packaging
+
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Jupyter (if used)
+
+.ipynb_checkpoints/
+
+# =========================
+
+# FastAPI / Uvicorn
+
+# =========================
+
+*.pid
+*.sock
+
+# =========================
+
+# Database
+
+# =========================
+
+*.sqlite3
+*.db
+
+# MongoDB local dumps
+
+dump/
+
+# =========================
+
+# Logs
+
+# =========================
+
+logs/
+*.log
+
+# =========================
+
+# Uploaded Files (PDFs)
+
+# =========================
+
+uploads/
+*.pdf
+
+# =========================
+
+# IDE / Editor
+
+# =========================
+
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# =========================
+
+# OS Files
+
+# =========================
+
+Desktop.ini
+
+# =========================
+
+# Coverage / Testing
+
+# =========================
+
+coverage/
+htmlcov/
+.pytest_cache/
+
+# =========================
+
+# Misc
+
+# =========================
+
+*.bak
+*.orig
