@@ -60,15 +60,18 @@ export default function AnalysisDetail() {
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '48px', paddingBottom: '64px' }}>
       <header style={{ display: 'flex', alignItems: 'flex-start', gap: '24px' }}>
-        <Link to="/dashboard" className="btn btn-secondary" style={{ padding: '8px', borderRadius: '50%' }}>
+        <Link to="/dashboard" className="btn btn-secondary no-print" style={{ padding: '8px', borderRadius: '50%' }}>
           <ArrowLeft size={18} />
         </Link>
-        <div>
+        <div style={{ flex: 1 }}>
           <h1 style={{ fontSize: '32px', marginBottom: '8px' }}>Analysis Results</h1>
           <p style={{ color: 'var(--secondary)', fontSize: '14px' }}>
             Statement: <strong style={{ color: 'var(--primary)' }}>{data.originalFilename}</strong> • Evaluated on {new Date(data.createdAt).toLocaleDateString()}
           </p>
         </div>
+        <button className="btn btn-primary no-print" onClick={() => window.print()} style={{ whiteSpace: 'nowrap' }}>
+          Download Report
+        </button>
       </header>
 
       {/* Grid top row: Cash Flow summary & Risk Score */}
@@ -117,10 +120,20 @@ export default function AnalysisDetail() {
         <div className="card animate-slide-up" style={{ animationDelay: '0.1s', animationFillMode: 'both', display: 'flex', flexDirection: 'column' }}>
           <h2 style={{ fontSize: '18px', marginBottom: '32px' }}>Risk Engine</h2>
           
-          <div style={{ alignSelf: 'center', position: 'relative', width: '220px', height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: `conic-gradient(var(--brand) ${risk.fri_score || 0}%, #171717 0)` }}>
-            <div style={{ width: '206px', height: '206px', background: 'var(--bg-surface)', borderRadius: '50%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: '56px', fontWeight: 800, color: 'var(--primary)', letterSpacing: '-0.04em', lineHeight: 1 }}>{Math.round(risk.fri_score || 0)}</span>
-              <span style={{ fontSize: '13px', color: 'var(--secondary)', fontWeight: 500, marginTop: '8px' }}>FRI SCORE</span>
+          <div style={{ alignSelf: 'center' }}>
+            <div className="tooltip-container">
+              <div style={{ position: 'relative', width: '220px', height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: `conic-gradient(${risk.fri_score <= 30 ? 'var(--success)' : risk.fri_score >= 70 ? 'var(--danger)' : '#f59e0b'} ${risk.fri_score || 0}%, #171717 0)` }}>
+                <div style={{ width: '206px', height: '206px', background: 'var(--bg-surface)', borderRadius: '50%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '56px', fontWeight: 800, color: 'var(--primary)', letterSpacing: '-0.04em', lineHeight: 1 }}>{Math.round(risk.fri_score || 0)}</span>
+                  <span style={{ fontSize: '13px', color: 'var(--secondary)', fontWeight: 500, marginTop: '8px' }}>FRI SCORE</span>
+                </div>
+              </div>
+              <div className="tooltip-text no-print">
+                <strong style={{ color: 'var(--primary)' }}>Financial Risk Index (FRI)</strong><br/><br/>
+                <span style={{color: 'var(--success)'}}>0-30:</span> Healthy finances & good coverage.<br/><br/>
+                <span style={{color: '#f59e0b'}}>31-69:</span> Moderate risk. Gaps in cashflow or insurance.<br/><br/>
+                <span style={{color: 'var(--danger)'}}>70+:</span> High risk. Urgent protective cover needed.
+              </div>
             </div>
           </div>
           
