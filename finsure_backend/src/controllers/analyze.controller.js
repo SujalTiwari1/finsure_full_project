@@ -1,3 +1,4 @@
+import { Analysis } from "../models/Analysis.model.js";
 import { forwardAnalyzeToMl } from "../services/ml.service.js";
 
 function parseOptionalNumber(value, fallback = 0) {
@@ -7,7 +8,8 @@ function parseOptionalNumber(value, fallback = 0) {
 }
 
 /**
- * POST /api/analyze — PRD §7: proxy full pipeline to FastAPI /analyze/
+ * POST /api/analyze — PRD §7: PDF → FastAPI full pipeline (parse → categorize → risk → recommend).
+ * Requires auth. Phase 6: persists result for history.
  */
 export async function analyze(req, res, next) {
   try {
@@ -15,8 +17,7 @@ export async function analyze(req, res, next) {
       return res.status(400).json({ error: "PDF file is required (field name: file)." });
     }
 
-    const { income, age, city, dependents, existing_term, existing_health, userId } =
-      req.body;
+    const { income, age, city, dependents, existing_term, existing_health } = req.body;
 
     if (city === undefined || city === null || String(city).trim() === "") {
       return res.status(400).json({ error: "city is required." });
@@ -32,9 +33,15 @@ export async function analyze(req, res, next) {
     if (!Number.isFinite(ageNum) || !Number.isInteger(ageNum)) {
       return res.status(400).json({ error: "age must be an integer." });
     }
+    if (ageNum < 18 || ageNum > 70) {
+      return res.status(400).json({ error: "age must be between 18 and 70." });
+    }
     if (!Number.isFinite(depNum) || !Number.isInteger(depNum) || depNum < 0) {
       return res.status(400).json({ error: "dependents must be a non-negative integer." });
     }
+
+    const existingTerm = parseOptionalNumber(existing_term, 0);
+    const existingHealth = parseOptionalNumber(existing_health, 0);
 
     const payload = await forwardAnalyzeToMl({
       buffer: req.file.buffer,
@@ -44,12 +51,34 @@ export async function analyze(req, res, next) {
       age: ageNum,
       city: String(city).trim(),
       dependents: depNum,
-      existing_term: parseOptionalNumber(existing_term, 0),
-      existing_health: parseOptionalNumber(existing_health, 0),
+      existing_term: existingTerm,
+      existing_health: existingHealth,
     });
 
-    if (userId !== undefined) payload.userId = userId;
-    return res.json(payload);
+    const resultCore = {
+      transactions: payload.transactions,
+      total_transactions: payload.total_transactions,
+      cash_flow: payload.cash_flow,
+      risk: payload.risk,
+      recommendations: payload.recommendations,
+    };
+
+    const analysis = await Analysis.create({
+      user: req.user.id,
+      originalFilename: req.file.originalname || "",
+      income: incomeNum,
+      age: ageNum,
+      city: String(city).trim(),
+      dependents: depNum,
+      existingTerm,
+      existingHealth,
+      result: resultCore,
+    });
+
+    return res.json({
+      ...payload,
+      analysisId: analysis.id,
+    });
   } catch (err) {
     next(err);
   }

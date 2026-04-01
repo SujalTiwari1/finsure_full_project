@@ -1,6 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { analyze } from "../controllers/analyze.controller.js";
+import { requireAuth } from "../middleware/auth.middleware.js";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -19,6 +20,6 @@ const upload = multer({
 
 const router = Router();
 
-router.post("/", upload.single("file"), analyze);
+router.post("/", requireAuth, upload.single("file"), analyze);
 
 export default router;

@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import multer from "multer";
 import { getMongoStatus } from "./config/db.js";
+import analysisRoutes from "./routes/analysis.routes.js";
 import analyzeRoutes from "./routes/analyze.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import mlRoutes from "./routes/ml.routes.js";
@@ -28,6 +29,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api/analyze", analyzeRoutes);
+app.use("/api/analysis", analysisRoutes);
 app.use("/api/ml", mlRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
