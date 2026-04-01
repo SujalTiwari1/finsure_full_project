@@ -1,0 +1,5 @@
+﻿# Cursor codebase indexing: only finsure_ml and finsure_backend
+# (PRD: finsure_backend/prd.md is included with the backend tree)
+/*
+!/finsure_ml/
+!/finsure_backend/

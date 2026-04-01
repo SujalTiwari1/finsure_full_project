@@ -1,0 +1,28 @@
+{
+  "name": "finsure_backend",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "SujalTiwari",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "test:auth": "node src/scripts/smokeAuth.mjs",
+    "test:ml": "node src/scripts/smokeMlPipeline.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.1.1",
+    "mongoose": "^9.3.3",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
