@@ -19,6 +19,8 @@ class Transaction(BaseModel):
 class RiskScoreRequest(BaseModel):
     income:       float = Field(..., gt=0, description="Monthly income in ₹")
     dependents:   int   = Field(..., ge=0, description="Number of dependents")
+    existing_term:   float = Field(default=0.0, description="Existing term insurance cover")
+    existing_health: float = Field(default=0.0, description="Existing health insurance cover")
     transactions: list[Transaction]
 
 
@@ -49,6 +51,8 @@ def get_risk_score(request: RiskScoreRequest, app_request: Request):
         income=request.income,
         dependents=request.dependents,
         risk_artifact=risk_artifact,
+        existing_term=request.existing_term,
+        existing_health=request.existing_health,
     )
 
     return {

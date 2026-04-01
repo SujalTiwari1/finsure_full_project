@@ -103,6 +103,8 @@ export async function runMlPipeline({
     income,
     dependents,
     transactions: txs,
+    existing_term,
+    existing_health,
   });
   const recommend = await forwardRecommendToMl({
     income,

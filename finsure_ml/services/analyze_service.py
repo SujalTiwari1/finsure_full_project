@@ -69,10 +69,12 @@ def run_full_analysis(
     # ── Step 3: Compute FRI Risk Score ────────────────────────
     logger.info("  [3/4] Computing FRI risk score...")
     risk_result = compute_risk_score(
-        transactions  = transactions,
-        income        = income,
-        dependents    = dependents,
-        risk_artifact = risk_artifact,
+        transactions    = transactions,
+        income          = income,
+        dependents      = dependents,
+        risk_artifact   = risk_artifact,
+        existing_term   = existing_term,
+        existing_health = existing_health,
     )
 
     # ── Step 4: Generate Recommendations ──────────────────────

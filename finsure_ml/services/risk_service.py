@@ -27,6 +27,8 @@ def _extract_features(
     transactions: list[dict],
     income: float,
     dependents: int,
+    existing_term: float = 0.0,
+    existing_health: float = 0.0,
 ) -> dict:
     """
     Derives model input features from categorized transactions + profile.
@@ -54,6 +56,8 @@ def _extract_features(
         "savings_rate":   savings_rate,
         "medical_ratio":  medical_ratio,
         "dependents":     dependents,
+        "existing_term":  existing_term,
+        "existing_health": existing_health,
     }
 
 
@@ -120,6 +124,8 @@ def compute_risk_score(
     income: float,
     dependents: int,
     risk_artifact: dict,
+    existing_term: float = 0.0,
+    existing_health: float = 0.0,
 ) -> dict:
     """
     Full pipeline: extract features → predict FRI → return result with breakdown.
@@ -135,13 +141,29 @@ def compute_risk_score(
     model    = risk_artifact["model"]
     features = risk_artifact["features"]
 
-    extracted = _extract_features(transactions, income, dependents)
+    extracted = _extract_features(transactions, income, dependents, existing_term, existing_health)
 
     # Build input in the exact feature order the model was trained on
     X = np.array([[extracted[f] for f in features]])
 
     raw_score = float(model.predict(X)[0])
     fri_score = round(min(max(raw_score, 0), 100), 1)
+
+    # ── Adjustment for Existing Insurance ──
+    reduction = 0.0
+    
+    # 1. Term Insurance (max 15 points deduction)
+    annual_income = income * 12
+    if annual_income > 0 and existing_term > 0:
+        term_ratio = existing_term / annual_income
+        reduction += min(15.0, (term_ratio / 10.0) * 15.0)
+        
+    # 2. Health Insurance (max 10 points deduction)
+    if existing_health > 0:
+        reduction += min(10.0, (existing_health / 500_000.0) * 10.0)
+
+    # Apply reduction and recap at 0-100 bounds
+    fri_score = round(max(fri_score - reduction, 0.0), 1)
     risk_level = get_risk_level(fri_score)
 
     breakdown = _component_breakdown(extracted)
