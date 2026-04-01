@@ -3,12 +3,25 @@ import { Analysis } from "../models/Analysis.model.js";
 
 const LIST_LIMIT = 50;
 
+/** Exclude heavy nested arrays from history list (major DB + memory win). */
+const LIST_PROJECTION = {
+  originalFilename: 1,
+  createdAt: 1,
+  income: 1,
+  age: 1,
+  city: 1,
+  dependents: 1,
+  "result.total_transactions": 1,
+  "result.cash_flow": 1,
+  "result.risk": 1,
+};
+
 /**
  * GET /api/analysis — history for the authenticated user (Phase 6 PRD).
  */
 export async function listMyAnalyses(req, res, next) {
   try {
-    const rows = await Analysis.find({ user: req.user.id })
+    const rows = await Analysis.find({ user: req.user.id }, LIST_PROJECTION)
       .sort({ createdAt: -1 })
       .limit(LIST_LIMIT)
       .lean();

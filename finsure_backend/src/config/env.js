@@ -20,6 +20,10 @@ export const ML_SERVICE_URL = (
   process.env.ML_SERVICE_URL || "http://127.0.0.1:8000"
 ).replace(/\/$/, "");
 
+/** Max wait for each ML `fetch` (ms). Prevents hung workers from a stuck FastAPI. */
+export const ML_REQUEST_TIMEOUT_MS =
+  Number(process.env.ML_REQUEST_TIMEOUT_MS) || 120_000;
+
 /** Phase 2 PRD — JWT access tokens */
 export const JWT_SECRET = (process.env.JWT_SECRET || "").trim();
 

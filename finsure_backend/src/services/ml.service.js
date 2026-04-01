@@ -1,4 +1,31 @@
-import { ML_SERVICE_URL } from "../config/env.js";
+import { ML_REQUEST_TIMEOUT_MS, ML_SERVICE_URL } from "../config/env.js";
+
+function mlFetchSignal() {
+  if (typeof AbortSignal !== "undefined" && AbortSignal.timeout) {
+    return AbortSignal.timeout(ML_REQUEST_TIMEOUT_MS);
+  }
+  const c = new AbortController();
+  setTimeout(() => c.abort(), ML_REQUEST_TIMEOUT_MS);
+  return c.signal;
+}
+
+function wrapMlNetworkError(err) {
+  if (
+    err?.name === "TimeoutError" ||
+    err?.name === "AbortError" ||
+    (err?.cause && err.cause.name === "TimeoutError")
+  ) {
+    const e = new Error("ML service request timed out.");
+    e.status = 504;
+    e.payload = { detail: "ML service request timed out." };
+    return e;
+  }
+  const e = new Error(err?.message || "ML service unavailable.");
+  e.status = 503;
+  e.payload = { detail: "Could not reach ML service." };
+  e.cause = err;
+  return e;
+}
 
 /**
  * POST JSON to the FastAPI service; throws with `.status` and `.payload` on failure.
@@ -9,11 +36,17 @@ import { ML_SERVICE_URL } from "../config/env.js";
 export async function callMlJson(path, body) {
   const normalized = path.startsWith("/") ? path : `/${path}`;
   const url = `${ML_SERVICE_URL}${normalized}`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  let res;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: mlFetchSignal(),
+    });
+  } catch (err) {
+    throw wrapMlNetworkError(err);
+  }
   const ct = res.headers.get("content-type") || "";
   const payload = ct.includes("application/json")
     ? await res.json()
@@ -124,7 +157,16 @@ export async function forwardAnalyzeToMl({
   form.append("existing_term", String(existing_term));
   form.append("existing_health", String(existing_health));
 
-  const res = await fetch(url, { method: "POST", body: form });
+  let res;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      body: form,
+      signal: mlFetchSignal(),
+    });
+  } catch (err) {
+    throw wrapMlNetworkError(err);
+  }
   const ct = res.headers.get("content-type") || "";
   const payload = ct.includes("application/json")
     ? await res.json()
